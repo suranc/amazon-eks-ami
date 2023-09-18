@@ -39,6 +39,7 @@
     "ssh_username": null,
     "ssm_agent_version": null,
     "subnet_id": null,
+    "vpc_id": null,
     "temporary_security_group_source_cidrs": null,
     "volume_type": null,
     "working_dir": null
@@ -97,6 +98,7 @@
         "creator": "{{user `creator`}}"
       },
       "subnet_id": "{{user `subnet_id`}}",
+      "vpc_id": "{{user `vpc_id`}}",
       "tags": {
         "Name": "{{user `ami_name`}}",
         "created": "{{timestamp}}",
@@ -121,7 +123,8 @@
       "type": "shell",
       "inline": [
         "mkdir -p {{user `working_dir`}}",
-        "mkdir -p {{user `working_dir`}}/log-collector-script"
+        "mkdir -p {{user `working_dir`}}/log-collector-script",
+	"mkdir -p {{user `working_dir`}}/certs"
       ]
     },
     {
@@ -136,6 +139,19 @@
       "type": "file",
       "source": "{{template_dir}}/files/",
       "destination": "{{user `working_dir`}}"
+    },
+    {
+      "type": "file",
+      "source": "{{template_dir}}/certs",
+      "destination": "{{user `working_dir`}}"
+    },
+    {
+      "type": "shell",
+      "inline": [
+	"find {{user `working_dir`}}",
+	"sudo mv {{user `working_dir`}}/certs/* /etc/pki/ca-trust/source/anchors/",
+        "sudo update-ca-trust"
+      ]
     },
     {
       "type": "file",
